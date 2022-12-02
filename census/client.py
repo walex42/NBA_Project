@@ -81,7 +81,12 @@ def geographies(states: List[str] = [], counties: List[str] = []) -> str:
 
 def county_codes(state_abbr: str) -> pd.DataFrame:
     """Gets a dataframe of county code info for a given state abbreviation"""
-    pass
+    state = us.states.lookup(state_abbr)
+    state_code = state.fips
+    base_url = 'https://www2.census.gov/geo/docs/reference/codes/files/st'
+    url = base_url + str(state_code) + '_' + state_abbr.lower() + '_cou.txt'
+    df = pd.read_csv(url)
+    return df
 
 
 def get(
