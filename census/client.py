@@ -1,7 +1,7 @@
 from typing import List
 
 import pandas as pd
-
+import us
 
 def endpoint(
     year: int,
@@ -71,7 +71,12 @@ def geographies(states: List[str] = [], counties: List[str] = []) -> str:
     list of FIPS codes that can be passed to the Census API.
 
     """
-    pass
+    converted = []
+    for state in states:
+        cur = us.states.lookup(state)
+        converted.append(str(cur.fips))
+    converted_list = ",".join(converted)
+    return converted_list
 
 
 def county_codes(state_abbr: str) -> pd.DataFrame:
