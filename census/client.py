@@ -48,7 +48,20 @@ def convert_values(variable_values: dict[str, List[str]]) -> dict[str, List[int]
     Returns:
         A dictionary of the same values represented by appropriate IDs
     """
-    pass
+    variable_int = {}
+    for key in variable_values:
+        values = variable_values[key]
+        for value in values:
+            if (value == "Both Sexes" or value == "Both Hispanic Origins"):
+                value = str(0)
+            if (value == "Male" or value == "Non-Hispanic"):
+                value = str(1)
+            if (value == "Female" or value == "Hispanic"):
+                value = str(2)
+        int_values = list(map(int, values))
+        variable_int[key] = int_values
+    return variable_int
+            
 
 
 def geographies(states: List[str] = [], counties: List[str] = []) -> str:
