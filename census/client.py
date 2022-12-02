@@ -85,7 +85,8 @@ def county_codes(state_abbr: str) -> pd.DataFrame:
     state_code = state.fips
     base_url = 'https://www2.census.gov/geo/docs/reference/codes/files/st'
     url = base_url + str(state_code) + '_' + state_abbr.lower() + '_cou.txt'
-    df = pd.read_csv(url)
+    df = pd.read_csv(url, dtype="str", names=["State", "State_FIPS", "Ct_FIPS", "Ct_Name","H1"])
+    df['Ct_FIPS'] = (df['Ct_FIPS']).str.lstrip('0')
     return df
 
 

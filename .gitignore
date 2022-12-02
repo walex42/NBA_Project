@@ -5,3 +5,5 @@ __pycache__
 *.Zone.Identifier
 .pytest_cache
 .mypy_cache
+
+key.env
