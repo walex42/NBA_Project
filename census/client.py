@@ -16,7 +16,9 @@ def endpoint(
     Returns:
         str: The Census API endpoint URL for the given dataset.
     """
-    pass
+    base = "https://api.census.gov/data"
+    end = base + "/" + str(year) + "/" + dataset_name
+    return end
 
 
 def variables(variables: list[str]) -> str:
@@ -30,7 +32,9 @@ def variables(variables: list[str]) -> str:
         str: A comma-separated string of variables that can be passed to the
             Census API.
     """
-    pass
+    list = variables
+    commaList = ",".join(list)
+    return commaList
 
 
 def convert_values(variable_values: dict[str, List[str]]) -> dict[str, List[int]]:
