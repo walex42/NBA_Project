@@ -2,8 +2,15 @@ import pandas as pd
 import string
 from datetime import date
 from bs4 import BeautifulSoup
+from requests import get
 import requests
 import re
+try:
+    from br_api.util import get_player_suffix
+    from br_api.lookup import lookup
+except:
+    from br_api.util import get_player_suffix
+    from br_api.lookup import lookup
 
 def scrapeSalary():
     """
@@ -30,7 +37,6 @@ def scrapeSalary():
 
 
 def getSeasonStatSoup(year, stat_type='per game'):
-
 	stat_type = stat_type.lower()
 	stat_type_dict = {'per game': 'per_game', 'total': 'totals', 'per 36': 'per_minute', 'advanced': 'advanced'}
 	if stat_type not in stat_type_dict.keys():
@@ -38,11 +44,11 @@ def getSeasonStatSoup(year, stat_type='per game'):
 	else:
 
 		# basketball-reference season stat page
-		base_url = 'http://www.basketball-reference.com/leagues/NBA_%(year)d_%(stat_type_str)s.html'
-		url = base_url % {'year': year, 'stat_type_str': stat_type_dict[stat_type]}
+		base_url = 'http://www.basketball-reference.com/leagues/NBA_'+str(year)+'_per_game.html'
+		#url = base_url % {'year': year, 'stat_type_str': stat_type_dict[stat_type]}
 
 		# BeautifulSoup parsing only works with "xml" parsing option -- not exactly sure why
-		r = requests.get(url)
+		r = requests.get(base_url)
 		soup = BeautifulSoup(r.text, "xml")
 
 		return soup
@@ -63,7 +69,7 @@ def getPlayerYear(name, year, stat_type='per game'):
 
 		# transform player name to "Last, First" format
 		name_list = name.split(' ')
-		name_list.reverse()
+		#name_list.reverse()
 		csk_str = ','.join(name_list)
 
 		# find player via csk_str, then iterate over stat entries
@@ -88,3 +94,45 @@ def listPlayers(year):
 		if td.has_attr('csk') and (re.search('\d', txt) == None) and (txt not in player_list):
 			player_list.append(txt)
 	return player_list
+
+def getPlayerStats(salaryDF):
+	statsDF = pd.DataFrame()
+	for index, row in salaryDF.iterrows():
+		print(row['c1'], row['c2'])
+	return statsDF
+
+
+def get_stats(_name, stat_type='PER_GAME', playoffs=False, career=False, ask_matches = True):
+    name = lookup(_name, ask_matches)
+    suffix = get_player_suffix(name)
+    if suffix:
+        suffix = suffix.replace('/', '%2F')
+    else:
+        return pd.DataFrame()
+    selector = stat_type.lower()
+    if playoffs:
+        selector = 'playoffs_'+selector
+    r = get(f'https://widgets.sports-reference.com/wg.fcgi?css=1&site=bbr&url={suffix}&div=div_{selector}')
+    if r.status_code==200:
+        soup = BeautifulSoup(r.content, 'html.parser')
+        table = soup.find('table')
+        if table is None:
+            return pd.DataFrame()
+        df = pd.read_html(str(table))[0]
+        df.rename(columns={'Season': 'SEASON', 'Age': 'AGE',
+                  'Tm': 'TEAM', 'Lg': 'LEAGUE', 'Pos': 'POS'}, inplace=True)
+        if 'FG.1' in df.columns:
+            df.rename(columns={'FG.1': 'FG%'}, inplace=True)
+        if 'eFG' in df.columns:
+            df.rename(columns={'eFG': 'eFG%'}, inplace=True)
+        if 'FT.1' in df.columns:
+            df.rename(columns={'FT.1': 'FT%'}, inplace=True)
+
+        career_index = df[df['SEASON']=='Career'].index[0]
+        if career:
+            df = df.iloc[career_index+2:, :]
+        else:
+            df = df.iloc[:career_index, :]
+
+        df = df.reset_index().drop('index', axis=1)
+        return df
