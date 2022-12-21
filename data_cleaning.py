@@ -1,7 +1,8 @@
-import smtpd
 from scraper import scrapeSalary
 import pandas as pd
+#This houses both of our cleaning commands that we though would make working with the data more manageable.
 
+#This is for salaries
 def salaryClean(df):
     df.rename(columns={'seasonStartYear': 'SEASON'}, inplace=True)
     df['SEASON'] = df['SEASON'].astype(str).astype(int)
@@ -18,10 +19,11 @@ def salaryClean(df):
     newDF = newDF.reset_index()
     return newDF
 
+#This is for player statistics
 def playerSeasonClean(playerDF):
     playerDF['SEASON']= playerDF['SEASON'].str.slice(stop=4)
-    playerDF = playerDF.drop(columns=['TEAM', 'LEAGUE','POS','G', 'GS'], inplace=True)
-    playerDF['SEASON'] = playerDF['SEASON'].astype(str).astype(int)
+    playerDF = playerDF.drop(columns=['TEAM', 'LEAGUE','POS','G', 'GS'])
+    playerDF['SEASON'] = pd.to_numeric(playerDF['SEASON'])
     alignedDF = playerDF[playerDF["SEASON"] > 2009]
     alignedDF = playerDF[playerDF["SEASON"] < 2020]
     return alignedDF

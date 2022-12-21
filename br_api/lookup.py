@@ -21,12 +21,8 @@ def levenshtein(s1, s2, maximum):
         distances = distances_
     return distances[-1]
 
-"""
-    User input is normalized/anglicized, then assigned a levenshtein score to 
-    find the closest matches. If an identical and unique match is found, it is 
-    returned. If many matches are found, either identical or distanced, all
-    are returned for final user approval.
-"""
+#This function is used to find all of the possible matches that could exist for a player.
+#This is needed due to the fact that there are some players with similar names, some have changed their names, or ther are a jr or second.
 def lookup(player, ask_matches = True):
     path = os.path.join(os.path.dirname(__file__), 'br_names.txt')
     normalized = unidecode.unidecode(player)
@@ -35,47 +31,31 @@ def lookup(player, ask_matches = True):
     with open(path) as file:
         Lines = file.readlines()
         for line in Lines:
-            """
-                A bound of 5 units of levenshtein distance is selected to   
-                account for possible misspellings or lingering non-unidecoded 
-                characters.
-            """
+            #We chose a bound of 5 to use as our match selection criteria to account for mispellings or foriegn characters
             dist = levenshtein(normalized.lower(), line[:-1].lower(), 5)
             if dist >= 0:
                 matches += [(line[:-1], dist)]
 
-    """
-        If one match is found, return that one;
-        otherwise, return list of likely candidates and allow
-        the user to confirm specifiy their selection.
-    """
+    #If there is one result return that result
     if len(matches) == 1 or ask_matches == False:
         matches.sort(key=lambda tup: tup[1])
         if ask_matches:
             print("You searched for \"{}\"\n{} result found.\n{}".format(player, len(matches), matches[0][0]))
             print("Results for {}:\n".format(matches[0][0]))
         return matches[0][0]
-
+    #This else statement is supposed to be for the case in which there is more than one match.
+    #Have not figured out how to select which match to use. Temporairly using the first one no matter what.
     elif len(matches) > 1:
         print("You searched for \"{}\"\n{} results found.".format(player, len(matches)))
         matches.sort(key=lambda tup: tup[1])
         i = 0
         return matches[0][0]
-        for match in matches:
-            print("{}: {}".format(i, match[0])) 
-            i += 1           
-                
-        selection = int(input("Pick one: "))
-        print("Results for {}:\n".format(matches[selection][0]))
-        return matches[selection][0]
-
+    #If player is not found return zero results
     elif len(matches) < 1:
         print("You searched for \"{}\"\n{} results found.".format(player, len(matches)))
         return ""
-        
+    #Final catch 
     else:
         print("You searched for \"{}\"\n{} result found.\n{}".format(player, len(matches), matches[0][0]))
         print("Results for {}:\n".format(matches[0][0]))
         return matches[0][0]
-
-    return ""
