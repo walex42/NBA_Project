@@ -14,11 +14,12 @@ except:
 
 def scrapeSalary():
     """
-    I scrape the data for seasons 2009-2010 to 2019-2020. 
+    I scrape the data for seasons 2009-2010 to 2018-2019. I left out the more recent seasons becasue that was the start of the pandemic.
+	With all the commotion there were some suspensions
     """
     df = pd.DataFrame(columns=['playerName', 'seasonStartYear', 'salary', 'inflationAdjSalary'])
     current_yr = int(date.today().strftime('%Y'))
-    for year in range(2010, 2020):
+    for year in range(2009, 2020):
         url = 'https://hoopshype.com/salaries/players/{}-{}/'.format(year-1, year)
         table = pd.io.html.read_html(url)[0]
         table.drop(columns=['Unnamed: 0'], inplace=True)
@@ -32,7 +33,6 @@ def scrapeSalary():
     table.set_axis(['playerName', 'salary'], axis=1, inplace=True)
     table['seasonStartYear'] = current_yr - 1
     df = pd.concat([df, table])
-    #df.to_csv(dest_file, index=False)
     return df
 
 

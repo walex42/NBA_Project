@@ -32,13 +32,16 @@ def create_last_name_part_of_suffix(potential_last_names):
 """
     Amended version of the original suffix function--it now creates all
     suffixes in place.
+
     Since basketball reference standardizes URL codes, it is much more efficient
     to create them locally and compare names to the page results. The maximum
     amount of times a player code repeats is 5, but only 2 players have this
     problem--meaning most player URLs are correctly accessed within 1 to 2
     iterations of the while loop below.
+
     Added unidecode to make normalizing incoming string characters more
     consistent.
+
     This implementation dropped player lookup fail count from 306 to 35 to 0.
 """
 def get_player_suffix(name):
